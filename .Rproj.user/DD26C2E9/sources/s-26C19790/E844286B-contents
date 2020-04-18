@@ -1,0 +1,117 @@
+#One-Way Analysis of Variance (ANOVA)
+
+rm(list = ls(all.names = TRUE)) #clear global environment
+
+#Libraries
+library(tidyverse)
+library(readxl)
+library(openxlsx)
+library(lubridate)
+
+
+#load citibike data for the months of January, April, July, and October
+population_january <- read_csv("~/Documents/R/RProjects-Public/ANOVA-Data/201901-citibike-tripdata.csv", col_names = TRUE)
+population_april <- read_csv("~/Documents/R/RProjects-Public/ANOVA-Data/201904-citibike-tripdata.csv", col_names = TRUE)
+population_july <- read_csv("~/Documents/R/RProjects-Public/ANOVA-Data/201907-citibike-tripdata.csv", col_names = TRUE)
+population_october <- read_csv("~/Documents/R/RProjects-Public/ANOVA-Data/201910-citibike-tripdata.csv", col_names = TRUE)
+
+
+#clean population set for unrealistic values (i.e. 61 second ride where drop-off and pick-up is the same location)
+reduced_january <- population_january %>% filter(tripduration > 120 & tripduration < 86400 & day(starttime) != 31) %>% 
+  mutate(day = day(starttime)) %>% mutate(month = month(starttime))
+
+reduced_april <- population_april %>% filter(tripduration > 120 & tripduration < 86400 & day(starttime) != 31) %>% 
+  mutate(day = day(starttime)) %>% mutate(month = month(starttime))
+
+reduced_july <- population_july %>% filter(tripduration > 120 & tripduration < 86400 & day(starttime) != 31) %>% 
+  mutate(day = day(starttime)) %>% mutate(month = month(starttime))
+
+reduced_october <- population_october %>% filter(tripduration > 120 & tripduration < 86400 & day(starttime) != 31) %>% 
+  mutate(day = day(starttime)) %>% mutate(month = month(starttime))
+
+
+#Population Tests-------------------------------------------------------------------------------------------------------
+
+#create population dataframe
+population_df <- rbind(reduced_january, reduced_april, reduced_july, reduced_october) %>% 
+  select(Month, tripduration)
+population_df$Month <- as.factor(population_df$Month)
+
+
+#normal distribution check
+ggplot(data = population_df, mapping = aes( x = tripduration, color = Month))+
+  geom_freqpoly()
+
+ggplot(data = reduced_october, mapping = aes( x = tripduration))+
+  geom_histogram()+
+  scale_x_log10()+
+  scale_y_log10()
+
+ggplot(data = reduced_october, mapping = aes( x = October))+
+  geom_freqpoly()
+
+dff <- data.frame(u = rnorm(10000, 1), v = rep("x",10000))
+ggplot(data = dff, mapping = aes( x = u))+
+  geom_histogram()
+
+
+
+#Sample Tests-------------------------------------------------------------------------------------------------------
+#list created for lapply()
+list_populations <- list(reduced_january, reduced_april, reduced_july, reduced_october)
+
+
+#pull a random sample of 1000 observations for each month to create a balanced design and simulate lack of population data
+list_samples <- lapply(list_populations, sample_n, 500)
+sample_january <- list_samples[[1]]
+sample_april <- list_samples[[2]]
+sample_july <- list_samples[[3]]
+sample_october <- list_samples[[4]]
+
+
+#create a dataframe with the relevant columns from each month
+data_trip_duration <- data.frame(sample_january$tripduration, sample_april$tripduration, 
+                                    sample_july$tripduration, sample_october$tripduration)
+
+
+#rename the columns for easier reference when executing gather function
+names(data_trip_duration) <- c("January", "April", "July", "October")
+
+
+#restructure the data as a single column for proper ANOVA format
+data_anova_ready <- gather(data_trip_duration, key = "Month", value = "Trip Duration", 1:4)
+data_anova_ready$Month <- as.factor(data_anova_ready$Month) #convert to factor for visulations and summary stats
+
+
+#extract some summary statistics for each group (month)
+sum_stats <- data_anova_ready %>% group_by(Month) %>% 
+  summarise(Observations = n(), Mean = mean(`Trip Duration`), Median = median(`Trip Duration`),
+            `Standarad Deviation` = sd(`Trip Duration`)) #na.rm not necessary here
+
+
+#visualize the samples via boxplot using ggplot2 package
+ggplot(data_anova_ready, mapping = aes( x = Month, y = `Trip Duration`))+
+  geom_boxplot(notch = TRUE)+
+  stat_summary(fun=mean, geom="point", shape=21, size=4, color = "darkgreen")+
+  scale_y_log10()+
+  ylab("Trip Duration (seconds)")+
+  labs(title = "Month Comparison via Notched Boxplot")+
+  theme_linedraw()+
+  theme(plot.title = element_text(hjust = .5))
+
+
+#ANOVA analysis
+output_anova <- aov(`Trip Duration` ~ Month, data = data_anova_ready)
+summary.aov(output_anova)
+
+
+#Tukey method for comparison
+TukeyHSD(output_anova)
+
+
+#write csv files for export
+list_of_datasets <- list("January" = sample_january, "April" = sample_april,
+                         "July" = sample_july, 
+                         "October" = sample_october, "ANOVA Data" = data_trip_duration)
+write.xlsx(list_of_datasets, file = "one_factor_data.xlsx")
+
