@@ -1,16 +1,19 @@
 #One-Way Analysis of Variance (ANOVA) - Balanced Design
 
-rm(list = ls(all.names = TRUE)) #clear global environment
+#clear global environment
+rm(list = ls(all.names = TRUE))
 
-#Libraries
+#Libraries----
 library(tidyverse)
 library(readxl)
 library(openxlsx)
 library(lubridate)
 library(car)
+library(gridExtra)
 
 
-#----Functions----
+#----Functions-----------------------------------------------
+
 
 #created function to clean citibike input data and eliminate trips greater than 24 hours and less than 2 minutes.
 citi_clean <- function(input_df){
@@ -22,7 +25,8 @@ citi_clean <- function(input_df){
 }
 
 
-#----Main----
+#----Main-------------------------------------------------
+
 
 #load citibike data for 2019 by month
 january <- read_csv("~/Documents/R/RProjects-Public/ANOVA-Data/201901-citibike-tripdata.csv", col_names = TRUE)
@@ -46,6 +50,7 @@ months_cleaned <- lapply(months_raw, citi_clean)
 
 
 #----Seasons----
+
 #collection by season
 winter <- rbind(months_cleaned[[1]], months_cleaned[[2]], months_cleaned[[3]]) %>% 
   select(day, month) %>% group_by(month,day) %>% summarise(trips = n()) %>% arrange(month) %>% 
@@ -64,10 +69,30 @@ fall<- rbind(months_cleaned[[10]], months_cleaned[[11]], months_cleaned[[12]]) %
   mutate(season = "fall")
 
 
+#seasons graphics
+w_hist <- ggplot(data = winter, mapping = aes(x = winter$trips))+geom_histogram(bins = 10, fill = "darkblue")+ 
+  theme_classic()+ labs(title = "Winter")+ ylab("Frequency")+ xlab("Trips")+
+  theme(plot.title = element_text(hjust = .25))
+  
+sp_hist <- ggplot(data = spring, mapping = aes(x = spring$trips))+geom_histogram(bins = 10, fill = "darkblue")+ 
+  theme_classic()+ labs(title = "Sprin g")+ ylab("Frequency")+ xlab("Trips")+
+  theme(plot.title = element_text(hjust = .25))
+
+su_hist <- ggplot(data = summer, mapping = aes(x = summer$trips))+geom_histogram(bins = 10, fill = "darkblue")+ 
+  theme_classic()+ labs(title = "Summer")+ ylab("Frequency")+ xlab("Trips")+
+  theme(plot.title = element_text(hjust = .25))
+
+ggplot(data = fall, mapping = aes(x = fall$trips))+geom_histogram( binwidth = 10000, fill = "darkblue")+ 
+  theme_classic()+ labs(title = "Fall")+ ylab("Frequency")+ xlab("Trips")+
+  theme(plot.title = element_text(hjust = .25))
+
+hist(fall$trips)
+
+
 #anaova ready data
-anova_data <- rbind(winter, spring, summer, fall) %>% group_by(season, month, day)
-anova_data$season <- as.factor(anova_data$season)
-anova_data <- anova_data[,c(4,1:3)] #order data
+anova_data_s <- rbind(winter, spring, summer, fall) %>% group_by(season, month, day)
+anova_data$season <- as.factor(anova_data_s$season)
+anova_data_s <- anova_data_s[,c(4,1:3)] #order data
 
 
 #to apply shapiro-wilk
@@ -80,14 +105,7 @@ sw_pvalues <- c(sw_results[[1]][2], sw_results[[2]][2], sw_results[[3]][2], sw_r
 
 
 #Levene's Test for equality of variances across populations - 2nd assumption for ANOVA - population
-leveneTest(trips ~ season, data = anova_data)
-
-
-#seasons graphics
-hist(winter$trips)
-hist(summer$trips)
-hist(fall$trips)
-hist(spring$trips)
+leveneTest(trips ~ season, data = anova_data_s)
 
 
 #----Monthly----
@@ -112,37 +130,18 @@ sw_pvalues_monthly <- c(sw_results_monthly[[1]][[2]], sw_results_monthly[[2]][[2
                         sw_results_monthly[[5]][[2]], sw_results_monthly[[6]][[2]], sw_results_monthly[[7]][[2]], sw_results_monthly[[8]][[2]],
                         sw_results_monthly[[9]][[2]], sw_results_monthly[[10]][[2]], sw_results_monthly[[11]][[2]], sw_results_monthly[[12]][[2]])
 
+#Kolmogorov-Smirnov normality tests (for months that fail Shapiro-Wilk) - 1st assumption for ANOVA - population
+ks_results_monthly <- list(ks.test( x = months_list[[1]], y = months_list[[5]]), 
+                           ks.test( x = months_list[[1]], y = months_list[[6]]), 
+                           ks.test( x = months_list[[1]], y = months_list[[8]]), 
+                           ks.test( x = months_list[[1]], y = months_list[[9]]), 
+                           ks.test( x = months_list[[1]], y = months_list[[10]]))
+
 
 #Levene's Test for equality of variances across populations - 2nd assumption for ANOVA - population
 leveneTest(trips ~ month, data = anova_data_monthly)
 
-
-
-#Sample Tests-------------------------------------------------------------------------------------------------------
-#list created for lapply()
-list_populations <- list(reduced_january, reduced_april, reduced_july, reduced_october)
-
-
-#pull a random sample of 1000 observations for each month to create a balanced design and simulate lack of population data
-list_samples <- lapply(list_populations, sample_n, 500)
-sample_january <- list_samples[[1]]
-sample_april <- list_samples[[2]]
-sample_july <- list_samples[[3]]
-sample_october <- list_samples[[4]]
-
-
-#create a dataframe with the relevant columns from each month
-data_trip_duration <- data.frame(sample_january$tripduration, sample_april$tripduration, 
-                                    sample_july$tripduration, sample_october$tripduration)
-
-
-#rename the columns for easier reference when executing gather function
-names(data_trip_duration) <- c("January", "April", "July", "October")
-
-
-#restructure the data as a single column for proper ANOVA format
-data_anova_ready <- gather(data_trip_duration, key = "Month", value = "Trip Duration", 1:4)
-data_anova_ready$Month <- as.factor(data_anova_ready$Month) #convert to factor for visulations and summary stats
+hist(months_list[[3]])
 
 
 #extract some summary statistics for each group (month)
