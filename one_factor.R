@@ -131,6 +131,7 @@ months_list <- list(anova_data_monthly$trips[1:28], anova_data_monthly$trips[29:
 
 #Shapiro-Wilk normality tests - 1st assumption for ANOVA - population
 sw_results_monthly <- lapply(months_list, shapiro.test)
+
 sw_pvalues_monthly <- c(sw_results_monthly[[1]][[2]], sw_results_monthly[[2]][[2]], sw_results_monthly[[3]][[2]], sw_results_monthly[[4]][[2]],
                         sw_results_monthly[[5]][[2]], sw_results_monthly[[6]][[2]], sw_results_monthly[[7]][[2]], sw_results_monthly[[8]][[2]],
                         sw_results_monthly[[9]][[2]], sw_results_monthly[[10]][[2]], sw_results_monthly[[11]][[2]], sw_results_monthly[[12]][[2]])
@@ -143,6 +144,8 @@ ks_results_monthly <- list(ks.test( x = months_list[[5]], y = rnorm(28, mean(mon
                            ks.test( x = months_list[[9]], y = rnorm(28, mean(months_list[[9]]), sd(months_list[[9]]))), 
                            ks.test( x = months_list[[10]], y = rnorm(28, mean(months_list[[10]]), sd(months_list[[10]]))))
 
+ks_pvalues_monthly <- c(ks_results_monthly[[1]][[2]], ks_results_monthly[[2]][[2]], ks_results_monthly[[3]][[2]], ks_results_monthly[[4]][[2]],
+                        ks_results_monthly[[5]][[2]])
 
 #Levene's Test for equality of variances across populations - 2nd assumption for ANOVA - population
 leveneTest(trips ~ month, data = anova_data_monthly)
@@ -150,25 +153,26 @@ leveneTest(trips ~ month, data = anova_data_monthly)
 
 #----ANOVA-Ready-Main---------------------------------------------
 
+
 #extract some summary statistics for each group (month)
-sum_stats <- data_anova_ready %>% group_by(Month) %>% 
-  summarise(Observations = n(), Mean = mean(`Trip Duration`), Median = median(`Trip Duration`),
-            `Standarad Deviation` = sd(`Trip Duration`)) #na.rm not necessary here
+sum_stats <- anova_data_monthly %>% group_by(month) %>% 
+  summarise(observations = n(), mean = mean(trips), st.dev = sd(trips)) # na.rm not necessary
 
 
 #visualize the samples via boxplot using ggplot2 package
-ggplot(data_anova_ready, mapping = aes( x = Month, y = `Trip Duration`))+
+ggplot(anova_data_monthly, mapping = aes( x = month, y = trips))+
   geom_boxplot(notch = TRUE)+
   stat_summary(fun=mean, geom="point", shape=21, size=4, color = "darkgreen")+
   scale_y_log10()+
-  ylab("Trip Duration (seconds)")+
+  ylab("Quantity of Trips")+
+  xlab("Month")+
   labs(title = "Month Comparison via Notched Boxplot")+
   theme_linedraw()+
   theme(plot.title = element_text(hjust = .5))
 
 
 #ANOVA analysis
-output_anova <- aov(`Trip Duration` ~ Month, data = data_anova_ready)
+output_anova <- aov(trips ~ month, data = anova_data_monthly)
 summary.aov(output_anova)
 
 
@@ -176,9 +180,5 @@ summary.aov(output_anova)
 TukeyHSD(output_anova)
 
 
-#write csv files for export
-list_of_datasets <- list("January" = sample_january, "April" = sample_april,
-                         "July" = sample_july, 
-                         "October" = sample_october, "ANOVA Data" = data_trip_duration)
-write.xlsx(list_of_datasets, file = "one_factor_data.xlsx")
+
 
