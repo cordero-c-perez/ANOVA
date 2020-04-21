@@ -49,7 +49,8 @@ months_raw <- list(january, february, march, april, may, june, july, august, sep
 months_cleaned <- lapply(months_raw, citi_clean)
 
 
-#----Seasons----
+#----Seasons----Main------------------------------------------
+
 
 #collection by season
 winter <- rbind(months_cleaned[[1]], months_cleaned[[2]], months_cleaned[[3]]) %>% 
@@ -69,24 +70,26 @@ fall<- rbind(months_cleaned[[10]], months_cleaned[[11]], months_cleaned[[12]]) %
   mutate(season = "fall")
 
 
-#seasons graphics
-w_hist <- ggplot(data = winter, mapping = aes(x = winter$trips))+geom_histogram(bins = 10, fill = "darkblue")+ 
+#seasons graphics for assumption check via visual inspection
+w_hist <- ggplot(data = winter, mapping = aes(x = winter$trips))+geom_histogram(bins = 8, fill = "grey", color = "black")+ 
   theme_classic()+ labs(title = "Winter")+ ylab("Frequency")+ xlab("Trips")+
   theme(plot.title = element_text(hjust = .25))
   
-sp_hist <- ggplot(data = spring, mapping = aes(x = spring$trips))+geom_histogram(bins = 10, fill = "darkblue")+ 
-  theme_classic()+ labs(title = "Sprin g")+ ylab("Frequency")+ xlab("Trips")+
+sp_hist <- ggplot(data = spring, mapping = aes(x = spring$trips))+geom_histogram(bins = 8, fill = "grey", color = "black")+ 
+  theme_classic()+ labs(title = "Spring")+ ylab("Frequency")+ xlab("Trips")+
   theme(plot.title = element_text(hjust = .25))
 
-su_hist <- ggplot(data = summer, mapping = aes(x = summer$trips))+geom_histogram(bins = 10, fill = "darkblue")+ 
+su_hist <- ggplot(data = summer, mapping = aes(x = summer$trips))+geom_histogram(bins = 8, fill = "grey", color = "black")+ 
   theme_classic()+ labs(title = "Summer")+ ylab("Frequency")+ xlab("Trips")+
   theme(plot.title = element_text(hjust = .25))
 
-ggplot(data = fall, mapping = aes(x = fall$trips))+geom_histogram( binwidth = 10000, fill = "darkblue")+ 
+f_hist <- ggplot(data = fall, mapping = aes(x = fall$trips))+geom_histogram(bins = 8, fill = "grey", color = "black")+ 
   theme_classic()+ labs(title = "Fall")+ ylab("Frequency")+ xlab("Trips")+
   theme(plot.title = element_text(hjust = .25))
 
-hist(fall$trips)
+
+#arrange into a grid for easy viewing
+grid.arrange(w_hist,  sp_hist, su_hist, f_hist, ncol = 2)
 
 
 #anaova ready data
@@ -105,10 +108,12 @@ sw_pvalues <- c(sw_results[[1]][2], sw_results[[2]][2], sw_results[[3]][2], sw_r
 
 
 #Levene's Test for equality of variances across populations - 2nd assumption for ANOVA - population
-leveneTest(trips ~ season, data = anova_data_s)
+leveneTest(trips ~ season, data = anova_data_s) #fails Levene's Test confirming visual inspection
 
 
-#----Monthly----
+#----Monthly----Main--------------------------------------------
+
+
 #collection by month
 anova_data_monthly <- rbind(months_cleaned[[1]], months_cleaned[[2]], months_cleaned[[3]],
                     months_cleaned[[4]], months_cleaned[[5]], months_cleaned[[6]],
@@ -130,19 +135,20 @@ sw_pvalues_monthly <- c(sw_results_monthly[[1]][[2]], sw_results_monthly[[2]][[2
                         sw_results_monthly[[5]][[2]], sw_results_monthly[[6]][[2]], sw_results_monthly[[7]][[2]], sw_results_monthly[[8]][[2]],
                         sw_results_monthly[[9]][[2]], sw_results_monthly[[10]][[2]], sw_results_monthly[[11]][[2]], sw_results_monthly[[12]][[2]])
 
+
 #Kolmogorov-Smirnov normality tests (for months that fail Shapiro-Wilk) - 1st assumption for ANOVA - population
-ks_results_monthly <- list(ks.test( x = months_list[[1]], y = months_list[[5]]), 
-                           ks.test( x = months_list[[1]], y = months_list[[6]]), 
-                           ks.test( x = months_list[[1]], y = months_list[[8]]), 
-                           ks.test( x = months_list[[1]], y = months_list[[9]]), 
-                           ks.test( x = months_list[[1]], y = months_list[[10]]))
+ks_results_monthly <- list(ks.test( x = months_list[[5]], y = rnorm(28, mean(months_list[[5]]), sd(months_list[[5]]))), 
+                           ks.test( x = months_list[[6]], y = rnorm(28, mean(months_list[[6]]), sd(months_list[[6]]))), 
+                           ks.test( x = months_list[[8]], y = rnorm(28, mean(months_list[[8]]), sd(months_list[[8]]))), 
+                           ks.test( x = months_list[[9]], y = rnorm(28, mean(months_list[[9]]), sd(months_list[[9]]))), 
+                           ks.test( x = months_list[[10]], y = rnorm(28, mean(months_list[[10]]), sd(months_list[[10]]))))
 
 
 #Levene's Test for equality of variances across populations - 2nd assumption for ANOVA - population
 leveneTest(trips ~ month, data = anova_data_monthly)
 
-hist(months_list[[3]])
 
+#----ANOVA-Ready-Main---------------------------------------------
 
 #extract some summary statistics for each group (month)
 sum_stats <- data_anova_ready %>% group_by(Month) %>% 
