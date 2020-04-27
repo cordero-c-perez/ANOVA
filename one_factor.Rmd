@@ -7,8 +7,57 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+&nbsp;  
 
-```{r, include = FALSE, echo = FALSE}
+## Analysis of Variance (ANOVA)
+
+The ANOVA is a great way to determine if there are any statistically significant differences between the averages of three or more independent groups. In this case I want to determine if there are any significant differences between the average number of citibike trips across four points in time, which correspond to the four different seasons in the year. The hypothesis test underlying the anova is as follows:
+
+Null Hypothesis (Ho): All sample averages are equal (mu(1) = mu(2) = ... = mu(n)).  
+Alternative Hypothesis (Ha): At least one average is statistically different from the rest.  
+
+The analysis is a test that relies on a ratio of variation. There are three types (arguably two) of variation in the one-way (one factor) ANOVA; Treatment Variation (between groups), Random Variation (within group), and Total Variation (which is the sum of the previous two). The between group variation is divided by the associated degrees of freedom (k-1) and the value becomes the numerator. The within group variation is divided by the associated degress of freedom k(n-1) and the value becomes the denominator. The final result is a test statistic which is then compared to a critical F-value and based on that comparison, the conclusion is to either reject or fail to reject Ho.
+
+The easiest way to identify the result is to compare the p-value produced by the test to alpha (the significance level of the test). Should the p-value be smaller than alpha, Ho is rejected. The same applies to a majority of the p-values produced by R with the exception of a few, such as the Kolmogorov-Smirnov test. When the function is used to compare two test samples, the higher the p-value the more likely the samples come from the same distribution, as this value relates to the likelihood of finding an absolute difference when comparing cumulative distributions. However this interpretation can get confusing when p-values such as (.54) are produced as p-values this high typically support the null hypothesism but for the ks.test() it simply tells us that half of our data is "alike".  
+
+The ANOVA assumptions are as follows:
+1. The population for each sample should be normally distributed.
+2. The variances for the populations are approx. equal
+3. There should be minimal to no outliers ( usually of greater importance in unbalanced designs)
+4. Observations should be independent across and within groups.  
+
+It is typically very easy to manage or assume these assumptions depending upon the context. For example, if the ANOVA was being used to measure the effectiveness of 3 prep courses on students, we know something likes test scores is normally distributed and therefore picking a random sample of students is enough to satisfy 1,2, and 4; and in establishing the baseline by measuring the initial scores prior to the treatments, outliers would tend to reveal themselves. This would assist in verifying assumption 3.
+
+The data used in this analysis relates to the population of NYC Citibike riders, and becasue of this I assume that the aggregate day totals, grouped by month, is very likely to be normal with roughly equivalent variances across months (groups). However this will still be checked. The observations are also indpendant as each days aggregate totals do not relate to the previous day; the same applies for the groups (months).  
+
+&nbsp;  
+
+## Data  
+
+Citibike data used for this analysis is publicly available and can be found [here](https://www.citibikenyc.com/system-data).  
+&nbsp; 
+
+## Methodology
+
+1. Download all individual 2019 monthly files for four months: January, April, July, and November. 
+2. Find the quantity of trips per month, per day, for the first 28 days. Seeing as the sample size is quite small, it is very important that certain assumptions be checked prior to conducting the analysis.
+3. Conduct the ANOVA
+    + Exploratory Data Analysis (EDA)
+    + Assumptions Checks
+    + Outlier Comparison
+    + Results and Reasonability
+&nbsp; 
+&nbsp; 
+
+I created the following code to handle steps 1 and 2. Notice that a function was created to eliminate what I feel to be unrealistic values in the data. Citibike policy states that trips exceeding a 24 hour period are subject to a fine of 1,200 dollars, and because of this it seems unlikely to include trips where the trip duration was greater than 24 hours as these are most likely incidents of loss, theft, or broken equipment that needs to be serviced. In fact, the data specifies when a bike is taken to what appears to be a repair station or Citibike facility. 
+
+The notes that accompany the data also state that trips less than 60 seconds in duration are excluded as this is usually human error in trying to return or retrieve the equipment, which makes sense. The policy further states that each type of user (customer or subscriber) is alotted a maxium time per trip for which a charge of 15 cents per minute applies should that alotted time be exceeded. This is roughly 9 dollars per hour. I find it very likley that someone would pay 9 dollars per hour for a bike rental in NYC, however I find it very unlikely that someone would pay this for 24 hours.
+
+Because of the above, I chose to exclude all trips that are less than 5 minutes in length, where the pick-up station is the same as the drop-off station. It is likley that someone can cross an avenue in 5 minutes via citibike, but I doubt a roundtrip in that time is feasible. Also the original data inlcudes 61 second trips which, quite frankly, are not that different from 60 second trips already exlcuded. I think 5 minutes with the second condition is a good way to isolate and remove small trips that are likley human error and/or are unrealistic. Further, I chose to exlcude trips that exceed 12 hours as the total cost for a 12 hour rental exceeds 100 dollars and becomes cost prohibitive as retail stores have bikes available for purchase starting at that price.
+&nbsp;  
+
+
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = FALSE, warning = FALSE}
 
 #One-Way Analysis of Variance (ANOVA) - Balanced Design
 
@@ -22,7 +71,6 @@ library(openxlsx)
 library(lubridate)
 library(car)
 library(gridExtra)
-
 
 #----Functions-----------------------------------------------
 
@@ -72,7 +120,13 @@ july_vi <- months_cleaned[[3]]%>%
 
 november_vi <- months_cleaned[[4]] %>% 
   select(day, month) %>% group_by(month,day) %>% summarise(trips = n()) %>% arrange(month)
+```
+&nbsp;  
 
+The following code prepares the data for visual inspection (anova format, aggregated bymonth and day) and produces a histogram of each sample.
+&nbsp;  
+
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = FALSE, warning = FALSE, fig.align = 'center'}
 
 # graphics for assumption check via visual inspection
 january_hist <- ggplot(data = january_vi, mapping = aes(x = trips))+geom_histogram(bins = 8, fill = "grey", color = "black")+ 
@@ -95,6 +149,25 @@ november_hist <- ggplot(data = november_vi, mapping = aes(x = trips))+geom_histo
 #arrange into a grid for easy viewing
 grid.arrange(january_hist,  april_hist, july_hist, november_hist, ncol = 2)
 
+```
+&nbsp;  
+
+The histograms show a normal like distribution for the most part, however there are some questions with the skewness of January and the high initial frequency in July. To verify the normality assumption, the Shapiro-Wilk test was implemented in the following code  and a boolean test vector was created to test if the P-value is greater than an alpha of 5% (95% confidence level). The Shapiro-Wilk test essentially fits a gaussian curve to the data and tests the following:
+
+Ho: The data is a sample from some normal distribution
+Ha: The data is not a sample from some normal distribution 
+
+As long as the p-values are greater than the level of significance it is safe to assume normality as this indicates a failure to reject the null hypothesis.
+
+Levene's Test is also conducted to verify assumption #2 (similar variances). Levene's Test tests the following hypothesis:
+
+Ho: The sample variances are equal
+Ha: The sample variances are not equal
+
+Again, a p-value greater than the level of significance shows a failure to reject the null hypothesis, which is what is need to verify the assumption.
+&nbsp;  
+
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = FALSE, warning = FALSE}
 
 #anaova ready data
 anova_data <- rbind(january_vi, april_vi, july_vi, november_vi) %>% group_by(month, day)
@@ -116,7 +189,13 @@ sw_pvalues > .05 #if all true then fail to reject Ho
 #Levene's Test for equality of variances across populations - 2nd assumption for ANOVA - population
 leveneTest(trips ~ month, data = anova_data) #fails Levene's Test confirming visual inspection
 
+```
+&nbsp;  
 
+Because the following
+&nbsp;  
+
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = FALSE, warning = FALSE}
 
 #----ANOVA-Ready-Main---------------------------------------------
 
@@ -233,18 +312,4 @@ sin_curve <- ggplot(data = sin_df, mapping = aes(x = x, y = y))+
   theme(axis.text = element_blank(), axis.ticks = element_blank(), axis.title = element_blank(),
         axis.line = element_blank(), plot.title = element_text(hjust = .5))+
   ggtitle("Seasonal Temperature Cycle")
-
-
 ```
-## Analysis of Variance (ANOVA)
-
-The ANOVA is a great way to determine if there are any statistically significant differences between the averages of three or more independent groups. In this case we want to determine if there are any significant differences between the average number of citibike trips across twelve months  
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-
-## Including Plots
-
-You can also embed plots, for example:
-
-
