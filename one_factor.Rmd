@@ -53,11 +53,11 @@ I created the following code to handle steps 1 and 2. Notice that a function was
 
 The notes that accompany the data also state that trips less than 60 seconds in duration are excluded as this is usually human error in trying to return or retrieve the equipment, which makes sense. The policy further states that each type of user (customer or subscriber) is alotted a maxium time per trip for which a charge of 15 cents per minute applies should that alotted time be exceeded. This is roughly 9 dollars per hour. I find it very likley that someone would pay 9 dollars per hour for a bike rental in NYC, however I find it very unlikely that someone would pay this for 24 hours.
 
-Because of the above, I chose to exclude all trips that are less than 5 minutes in length, where the pick-up station is the same as the drop-off station. It is likley that someone can cross an avenue in 5 minutes via citibike, but I doubt a roundtrip in that time is feasible. Also the original data inlcudes 61 second trips which, quite frankly, are not that different from 60 second trips already exlcuded. I think 5 minutes with the second condition is a good way to isolate and remove small trips that are likley human error and/or are unrealistic. Further, I chose to exlcude trips that exceed 12 hours as the total cost for a 12 hour rental exceeds 100 dollars and becomes cost prohibitive as retail stores have bikes available for purchase starting at that price.
+Because of the above, I chose to exclude all trips that are less than 5 minutes in length, where the pick-up station is the same as the drop-off station. It is likley that someone can cross an avenue in 5 minutes via citibike, but I doubt a roundtrip in that time is feasible. Also the original data inlcudes 61 second trips which, quite frankly, are not that different from 60 second trips already exlcuded. I think 5 minutes with the second condition is a good way to isolate and remove small trips that are likley human error and/or are unrealistic. Further, I chose to exlcude trips that exceed 12 hours as the total cost for a 12 hour rental exceeds 100 dollars and becomes cost prohibitive as retail stores have bikes available with a purchase price starting at 100 dollars.
 &nbsp;  
 
 
-```{r, include = TRUE, echo = TRUE, message = FALSE, comment = FALSE, warning = FALSE}
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = "", warning = FALSE}
 
 #One-Way Analysis of Variance (ANOVA) - Balanced Design
 
@@ -123,10 +123,11 @@ november_vi <- months_cleaned[[4]] %>%
 ```
 &nbsp;  
 
-The following code prepares the data for visual inspection (anova format, aggregated bymonth and day) and produces a histogram of each sample.
+The following code prepares the data for visual inspection (anova format, aggregated by month and day) and produces a histogram of each sample.
 &nbsp;  
 
-```{r, include = TRUE, echo = TRUE, message = FALSE, comment = FALSE, warning = FALSE, fig.align = 'center'}
+
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = "", warning = FALSE, fig.align = 'center'}
 
 # graphics for assumption check via visual inspection
 january_hist <- ggplot(data = january_vi, mapping = aes(x = trips))+geom_histogram(bins = 8, fill = "grey", color = "black")+ 
@@ -154,22 +155,22 @@ grid.arrange(january_hist,  april_hist, july_hist, november_hist, ncol = 2)
 
 The histograms show a normal like distribution for the most part, however there are some questions with the skewness of January and the high initial frequency in July. To verify the normality assumption, the Shapiro-Wilk test was implemented in the following code  and a boolean test vector was created to test if the P-value is greater than an alpha of 5% (95% confidence level). The Shapiro-Wilk test essentially fits a gaussian curve to the data and tests the following:
 
-Ho: The data is a sample from some normal distribution
+Ho: The data is a sample from some normal distribution  
 Ha: The data is not a sample from some normal distribution 
 
 As long as the p-values are greater than the level of significance it is safe to assume normality as this indicates a failure to reject the null hypothesis.
 
 Levene's Test is also conducted to verify assumption #2 (similar variances). Levene's Test tests the following hypothesis:
 
-Ho: The sample variances are equal
+Ho: The sample variances are equal  
 Ha: The sample variances are not equal
 
-Again, a p-value greater than the level of significance shows a failure to reject the null hypothesis, which is what is need to verify the assumption.
+Again, a p-value greater than the level of significance shows a failure to reject the null hypothesis, which is what is needed to verify the assumption.
 &nbsp;  
 
-```{r, include = TRUE, echo = TRUE, message = FALSE, comment = FALSE, warning = FALSE}
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = "", warning = FALSE}
 
-#anaova ready data
+#anova ready data
 anova_data <- rbind(january_vi, april_vi, july_vi, november_vi) %>% group_by(month, day)
 anova_data$month <- as.factor(anova_data$month)
 
@@ -183,7 +184,7 @@ sw_results <- lapply(months_list, shapiro.test)
 sw_pvalues <- c(sw_results[[1]][2], sw_results[[2]][2], sw_results[[3]][2], sw_results[[4]][2])
 
   #results
-sw_pvalues > .05 #if all true then fail to reject Ho
+unlist(sw_pvalues) > .05#if all true then fail to reject Ho
 
 
 #Levene's Test for equality of variances across populations - 2nd assumption for ANOVA - population
@@ -192,7 +193,7 @@ leveneTest(trips ~ month, data = anova_data) #fails Levene's Test confirming vis
 ```
 &nbsp;  
 
-Because the following
+All of the assumptions required for an ANOVA analysis have been verified. The following code provides summary statistics for each month along with a notched boxplot for easy confidence interval identification. The green circles indicate the mean of each sample and it is clear to see the degree to which outliers affect the mean as it relates to the median. The outliers will be addressed later in order to see the impact they have on the overall analysis which I anticipate is not significant.
 &nbsp;  
 
 ```{r, include = TRUE, echo = TRUE, message = FALSE, comment = FALSE, warning = FALSE}
@@ -203,6 +204,7 @@ Because the following
 #extract some summary statistics for each group (month)
 sum_stats <- anova_data %>% group_by(month) %>% 
   summarise(observations = n(), mean = mean(trips), st.dev = sd(trips)) # na.rm not necessary
+sum_stats
 
 
 #visualize the samples via boxplot using ggplot2 package
@@ -216,12 +218,28 @@ ggplot(anova_data, mapping = aes( x = month, y = trips))+
   theme_linedraw()+
   theme(plot.title = element_text(hjust = .5))
 
+```
+&nbsp;  
+
+The following F-test is the overall result from the analysis and it reveals an incredibly small p-value indicating the null hypothesis (Ho) should be rejected. This shows that at least one month has a significantly different average number of trips. The question now is, **which months are different from each other?**
+&nbsp;  
+
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = "", warning = FALSE}
 
 #ANOVA analysis
 output_anova <- aov(trips ~ month, data = anova_data)
 summary.aov(output_anova)
 
+```
+&nbsp;  
 
+The following test is a great way to specifically determine which means are different from each other through pair-wise comparisons accounting for the error associated to multiple pairwise comparisons, the "adjusted p-value". Each pairwise comparison tests the following:
+
+Ho: The means are the same.  
+Ha: The means are not the same.
+&nbsp;  
+
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = "", warning = FALSE}
 #Tukey method for comparison
 TukeyHSD(output_anova)
 
@@ -245,7 +263,8 @@ november_vir <- months_cleaned[[4]] %>%
 
 
 #anaova ready data
-anova_data_r <- rbind(january_vir[2:28,], april_vir[2:28,], july_vir[2:28,], november_vir[2:28,]) %>% group_by(month, day)
+anova_data_r <- rbind(january_vir[2:28,], april_vir[2:28,], july_vir[2:28,], november_vir[2:28,]) %>% 
+  group_by(month, day)
 anova_data_r$month <- as.factor(anova_data_r$month)
 
 
@@ -294,6 +313,13 @@ summary.aov(output_anova_r)
 #Tukey method for comparison
 TukeyHSD(output_anova_r)
 
+```
+&nbsp;  
+
+The following graph is a representation
+&nbsp;  
+
+```{r, include = TRUE, echo = TRUE, message = FALSE, comment = "", warning = FALSE}
 
 # sinusoidal curve
 x <-  seq(0,10,.1)
