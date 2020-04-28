@@ -122,7 +122,7 @@ that someone would pay 9 dollars per hour for a bike rental in NYC,
 however I find it very unlikely that someone would pay this for 24
 hours.
 
-Because of the above, I chose to exlcude trips that exceed 12 hours as
+Because of the above, I chose to exclude trips that exceed 12 hours as
 the total cost for a 12 hour rental exceeds 100 dollars and becomes cost
 prohibitive as retail stores have bikes available with a purchase price
 starting at 100 dollars. Further, I chose to exclude all trips that are
@@ -130,7 +130,7 @@ less than 5 minutes in length, where the pick-up station is the same as
 the drop-off station. It is likley that someone can cross an avenue in 5
 minutes via citibike, but I doubt a roundtrip in that time is feasible.
 Also the original data inlcudes 61 second trips which, quite frankly,
-are not that different from 60 second trips (**already exlcuded**). I
+are not that different from 60 second trips (**already excluded**). I
 think 5 minutes with the second condition is a good way to isolate and
 remove small trips that are likley human error and/or are unrealistic.
 
