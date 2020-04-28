@@ -1,7 +1,7 @@
 ---
 title: <center>One Factor ANOVA</center>
 author: <center>C. Perez</center>
-output: rmarkdown::github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -361,4 +361,3 @@ summary.aov(output_anova_r)
 TukeyHSD(output_anova_r)
 
 ```
-

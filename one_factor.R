@@ -212,9 +212,9 @@ sin_df <- as.data.frame(cbind(x,y))
 sin_curve <- ggplot(data = sin_df, mapping = aes(x = x, y = y))+
   geom_line()+
   theme_classic()+
-  geom_text( x = pi/2, y = 1.1, label = "Winter")+
-  geom_text( x = 1.5*pi, y = -1.1, label = "Summer")+
-  geom_text( x = pi/2+2*pi, y = 1.1, label = "Winter")+
+  geom_text( x = pi/2, y = 1.1, label = "Summer")+
+  geom_text( x = 1.5*pi, y = -1.1, label = "Winter")+
+  geom_text( x = pi/2+2*pi, y = 1.1, label = "Summer")+
   geom_text( x = 3*pi/3.5, y = 0, label = "Spring")+
   geom_text( x = 3*pi/3.5 + 1.25*pi, y = 0, label = "Fall")+
   ylim(c(-1.5,1.5))+
