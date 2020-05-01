@@ -74,7 +74,7 @@ The data used in this analysis are samples of the population of NYC
 Citibike riders, and because of this I assume that the aggregate day
 totals, grouped by month, is very likely to be normal with roughly
 equivalent variances across months (groups). However this will still be
-checked. The observations are also independant as each days aggregate
+checked. The observations are also independent as each days aggregate
 totals do not relate to the previous day; the same applies for the
 groups (months).  
  
