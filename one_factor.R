@@ -222,5 +222,3 @@ sin_curve <- ggplot(data = sin_df, mapping = aes(x = x, y = y))+
         axis.line = element_blank(), plot.title = element_text(hjust = .5))+
   ggtitle("Seasonal Temperature Cycle")
   
-
-

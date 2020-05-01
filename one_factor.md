@@ -50,7 +50,7 @@ is the samples come from the same distribution, as this value relates to
 the likelihood of finding an absolute difference when comparing
 cumulative distributions. However, this interpretation can get confusing
 when p-values such as (.54) are produced as p-values this high typically
-support the null hypothesis, but for the ks.test() it simply tells us
+supports the null hypothesis, but for the ks.test() it simply tells us
 that half of our data is “alike”.
 
 The ANOVA assumptions are as follows:
@@ -381,12 +381,12 @@ a great way to determine which means are statistically different from
 each other without inflating the likelihood of a Type I error. The
 output shows an adjusted p-value which takes into consideration the
 increased error associated to family pair-wise comparisons. The results
-of this post hoc test indicate that there is a significant differences
-between every pair with the exception of **Nov-Apr**. Because the
-p-value is greater than 5% for this pair, it’s a failure to reject the
-Ho which means there is not a statistial difference between the averages
-of these two months. The underlying hypothesis for each pair-wise test
-is as follows:
+of this post hoc test indicate that there is a significant difference
+between each pair with the exception of **Nov-Apr**. Because the p-value
+is greater than 5% for this pair, it’s a failure to reject the Ho which
+means there is not a statistical difference between the averages of
+these two months. The underlying hypothesis for each pair-wise test is
+as follows:
 
 **Ho**: The means are the same.  
 **Ha**: The means are not the same.
