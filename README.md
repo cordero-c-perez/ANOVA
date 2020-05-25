@@ -2,16 +2,17 @@ One Factor ANOVA
 ================
 C. Perez
 
+## Project Description
+
+An ongoing project to explore and understand various R methods used to
+verify ANOVA assumptions.  
+
 ## Description of Files
-
------
-
-  
 
 #### one\_factor.rmd
 
-A markdown file with an output converted to “.md” for easy github
-compatibility and readability directly in the viewer.
+A markdown file with an output converted to “.md” for github viewer
+compatability.
 
 #### one\_factor.md
 
@@ -28,12 +29,10 @@ Browser compatible output of one\_factor\_html.rmd file.
 
 #### one\_factor.r
 
-A script file containg just the code used in the one\_factor.rmd files.
+A script file containg the code used in the “.rmd” files.
 
 #### README.rmd
 
-A markdown file with an output converted to “.md” for easy github
-compatibility and readability directly in the viewer. This file just
-generates a README.md file for the repository.
+This file creates a README.md file for the repository.
 
-#### Note: Citibike data is not provided in the repository.
+###### Note: Citibike data is not provided in the repository.

@@ -1,6 +1,6 @@
 ---
 title: "One Factor ANOVA"
-author: "C. Perez"
+author: C. Perez
 output: rmarkdown::github_document
 ---
 
@@ -8,12 +8,16 @@ output: rmarkdown::github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Project Description
+
+An ongoing project to explore and understand various R methods used to verify ANOVA assumptions.
+&nbsp;  
+
+
 ## Description of Files
-***
-&nbsp;\  
 
 #### one_factor.rmd  
-A markdown file with an output converted to ".md" for easy github compatibility and readability directly in the viewer.  
+A markdown file with an output converted to ".md" for github viewer compatability.  
 
 #### one_factor.md
 Viewable output of one_factor.rmd file.
@@ -25,11 +29,11 @@ A markdown file with an output converted to ".html" for browser compatibility.
 Browser compatible output of one_factor_html.rmd file.
 
 #### one_factor.r
-A script file containg just the code used in the one_factor.rmd files.
+A script file containg the code used in the ".rmd" files.
 
 #### README.rmd
-A markdown file with an output converted to ".md" for easy github compatibility and readability directly in the viewer. This file just generates a README.md file for the repository.
+This file creates a README.md file for the repository.
 
-#### Note: Citibike data is not provided in the repository.
+###### Note: Citibike data is not provided in the repository.
 
 
