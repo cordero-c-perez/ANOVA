@@ -20,7 +20,14 @@ compatability.
 
 #### one\_factor.pdf
 
-Viewable output of one\_factor.rmd file.
+Viewable output of one\_factor.rmd file. This project explores the
+assumptions of the ANOVA test in the one factor (one-way) setting, and
+various tools available in R to verify these assumptions prior to
+conducting the analysis. Some tools explored in this analysis are as
+follows: Shapiro-Wilk’s Normality Test, Levene’s Test for Equality of
+Variance, Tukey’s Honest Significant Difference Test, distribution
+visualization (histograms, boxplots), and further exploratory data
+analysis.
 
 #### one\_factor.r
 
