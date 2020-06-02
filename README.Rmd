@@ -10,23 +10,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Project Description
 
-An ongoing project to explore and understand various R methods used to verify ANOVA assumptions.
+An ongoing project to explore and understand various R methods used to verify ANOVA assumptions. There will typically be three files for each project; one will contain the code (**.R**), another will be markdown (**.Rmd**), and the last (**.pdf**) can be viewed directly in github. The (.pdf) file description includes the associated project description.
 &nbsp;  
 
 
 ## Description of Files
 
 #### one_factor.rmd  
-A markdown file with an output converted to ".md" for github viewer compatability.  
+A markdown file with an output converted to ".pdf" for github viewer compatability.  
 
-#### one_factor.md
+#### one_factor.pdf
 Viewable output of one_factor.rmd file.
-
-#### one_factor_html.rmd  
-A markdown file with an output converted to ".html" for browser compatibility.
-
-#### one_factor_html.html
-Browser compatible output of one_factor_html.rmd file.
 
 #### one_factor.r
 A script file containg the code used in the ".rmd" files.

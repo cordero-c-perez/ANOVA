@@ -1,9 +1,9 @@
 {
-    "path" : "~/Documents/R/RProjects-Public/ANOVA",
-    "sortOrder" : [
+    "path": "~/Documents/R/RProjects-Public/ANOVA",
+    "sortOrder": [
         {
-            "ascending" : true,
-            "columnIndex" : 2
+            "columnIndex": 2,
+            "ascending": true
         }
     ]
 }
