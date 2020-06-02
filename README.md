@@ -16,7 +16,7 @@ The (.pdf) file description includes the associated project description.
 #### one\_factor.rmd
 
 A markdown file with an output converted to “.pdf” for github viewer
-compatability.
+compatibility.
 
 #### one\_factor.pdf
 
@@ -31,7 +31,7 @@ analysis.
 
 #### one\_factor.r
 
-A script file containg the code used in the “.rmd” files.
+A script file containing the code used in the “.rmd” files.
 
 #### README.rmd
 
