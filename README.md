@@ -37,4 +37,4 @@ A script file containing the code used in the “.rmd” files.
 
 This file creates a README.md file for the repository.
 
-###### Note: Citibike data is not provided in the repository.
+###### Note: data is not provided in the repository.
