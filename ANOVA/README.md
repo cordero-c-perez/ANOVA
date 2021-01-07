@@ -6,7 +6,8 @@ mini stats project; one will contain the code (**.R**), another will be markdown
 The (.pdf) file description includes the task description.
 
 
-## Description of Files
+
+## File Descriptions
 
 #### one\_factor.r
 
