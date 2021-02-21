@@ -10,7 +10,7 @@ description. There will be one file (.ipynb) for python projects as notebooks ca
 
 ## Files
 
-#### [OLS_ElasticNet_Ridge_Lasso_RandomForest.pdf]()
+#### [OLS_ElasticNet_Ridge_Lasso_RandomForest.pdf](https://github.com/cordero-c-perez/Stats/blob/master/OLS_ElasticNet_Ridge_Lasso_RandomForest.pdf)
 
 This project explores and applies four methods of linear regression, in addition to a
 random forest model, to predict the sale price of homes based on 40
@@ -23,7 +23,7 @@ Elastic-Net, an arbitrary alpha (.5) is used in the Elastic-Net model.
 This analysis also includes bootstrapped error bars of feature significance for
 each model. Data link is in the report.
 
-#### [one\_factor_anova.pdf]()
+#### [one\_factor_anova.pdf](https://github.com/cordero-c-perez/Stats/blob/master/one_factor_anova.pdf)
 
 Viewable output of one\_factor.rmd file. This project explores (i) the
 assumptions for the one factor (one-way) ANOVA test using Citibike data, and
